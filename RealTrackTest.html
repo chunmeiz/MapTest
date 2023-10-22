@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Running Track on Map</title>
+    <!-- Include Leaflet and other necessary CSS/JS files -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+</head>
+<body>
+    <h1>Running Track on Map</h1>
+    <div id="map" style="width: 100%; height: 500px;"></div>
+    
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+        var map;
+        var track = L.polyline([]);
+        var marker;
+        
+        function initMap() {
+            map = L.map('map').setView([0, 0], 13); // Default center at (0, 0)
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+            }).addTo(map);
+
+            // Start tracking
+            if ("geolocation" in navigator) {
+                navigator.geolocation.watchPosition(updateLocation, handleLocationError, {
+                    enableHighAccuracy: true, // Use GPS if available
+                    timeout: 1000, // 1 seconds
+                    maximumAge: 0 // No caching
+                });
+            } else {
+                console.error("Geolocation is not supported by this browser.");
+            }
+        }
+
+        function updateLocation(position) {
+            var lat = position.coords.latitude;
+            var lng = position.coords.longitude;
+
+            addPointToTrack(lat, lng);
+
+            // Center the map on the user's real-time location
+            map.setView([lat, lng], 13);
+             // Update the marker's position
+             if (marker) {
+                marker.setLatLng([lat, lng]);
+            } else {
+                // Create the marker if it doesn't exist
+                marker = L.marker([lat, lng]).addTo(map);
+            }
+        
+        }
+
+        function handleLocationError(error) {
+            console.error("Error getting location:", error.message);
+        }
+
+        function addPointToTrack(lat, lng) {
+            track.addLatLng([lat, lng]);
+            track.addTo(map); // Add the track layer to the map
+        }
+
+        // Your existing code for getRandomLat and getRandomLng
+
+        // Function to stop tracking, you can call this when needed
+        function stopTracking() {
+            track.remove();
+            if (marker) {
+                marker.remove(); // Remove the marker
+            }
+        }
+
+        // Initialize the map
+        initMap();
+    </script>
+</body>
+</html>
